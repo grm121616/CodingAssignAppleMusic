@@ -101,7 +101,8 @@ class DetailViewController: UIViewController {
             "ituneButton": ituneButton
         ]
         
-        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-[albumImage(300)]-[labelStackView]-[ituneButton(30)]", options: [], metrics: nil, views: viewsDict))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-[albumImage(300)]-[labelStackView]", options: [], metrics: nil, views: viewsDict))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:[ituneButton(30)]-20-|", options: [], metrics: nil, views: viewsDict))
         view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-[albumImage]-|", options: [], metrics: nil, views: viewsDict))
         view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-[labelStackView]-|", options: [], metrics: nil, views: viewsDict))
         view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-20-[ituneButton]-20-|", options: [], metrics: nil, views: viewsDict))
