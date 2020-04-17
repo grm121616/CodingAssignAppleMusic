@@ -24,12 +24,11 @@ class ViewModel: ViewModelProtocol{
     
     func loadData() {
         let urlString = "https://rss.itunes.apple.com/api/v1/us/apple-music/coming-soon/all/100/explicit.json"
-        guard let url = URL(string: urlString) else { return }
-        URLSession.shared.dataTask(with: url) { (data, _, error) in
-            guard let data = data else { return }
-            guard let jsonObject = try? JSONDecoder().decode(MusicStruct.self, from: data) else { return }
-            self.results = jsonObject.feed.results
-        }.resume()
+        let networkController = NetworkController()
+        networkController.getData(session: URLSession.shared, url: urlString) { (music: MusicStruct?, error) in
+            guard let music = music else { return }
+            self.results = music.feed.results
+        }
     }
     
     func getResult() -> [ResultContainer] {
