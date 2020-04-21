@@ -25,7 +25,7 @@ class ViewModel: ViewModelProtocol{
     func loadData() {
         let urlString = "https://rss.itunes.apple.com/api/v1/us/apple-music/coming-soon/all/100/explicit.json"
         let networkController = NetworkController()
-        networkController.getData(session: URLSession.shared, url: urlString) { (music: MusicStruct?, error) in
+        networkController.getData(url: urlString) { (music: MusicStruct?, error) in
             guard let music = music else { return }
             self.results = music.feed.results
         }

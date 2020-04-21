@@ -10,7 +10,7 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    var artistUrl: String = ""
+    var artistUrl: String?
     
     let artistNameLabel: UILabel = {
         let nameLabel = UILabel()
@@ -79,7 +79,7 @@ class DetailViewController: UIViewController {
     }()
     
     @objc func buttonAction(sender: UIButton!) {
-        guard let url = URL(string: artistUrl) else { return }
+        guard let artistURL = artistUrl, let url = URL(string: artistURL) else { return }
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
  
@@ -109,7 +109,7 @@ class DetailViewController: UIViewController {
     }
     
     func getConfigure(viewModelLoadImage: ViewModelLoadImage?) {
-        artistUrl = viewModelLoadImage?.getArtistUrl() ?? ""
+        artistUrl = viewModelLoadImage?.getArtistUrl() 
         artistNameLabel.text = viewModelLoadImage?.getName()
         albumNameLabel.text = viewModelLoadImage?.getAlbumName()
         releaseDateLabel.text = viewModelLoadImage?.getReleaseDate()

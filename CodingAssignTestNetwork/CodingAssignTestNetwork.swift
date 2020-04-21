@@ -16,7 +16,6 @@ class CodingAssignTestNetwork: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        sut = NetworkController()
     }
     
     override func tearDown() {
@@ -31,7 +30,9 @@ class CodingAssignTestNetwork: XCTestCase {
     
     func testLoadData() {
         let session = URLMockSession(data: nil, error: nil)
-        sut.getData(session: session, url: validURL) { (data: Data?, error) in
+        sut = NetworkController(session: session)
+        
+        sut.getData( url: validURL) { (data: Data?, error) in
             XCTAssertNil(data)
             let networkerror = error as? NetworkError
             XCTAssertTrue(networkerror == NetworkError.noData)
@@ -39,12 +40,14 @@ class CodingAssignTestNetwork: XCTestCase {
     }
     
     func testInvalidURL() {
-        sut.getData(session: URLSession.shared, url: "") { (_: Data?, error) in
+        let session = URLMockSession(data: nil, error: nil)
+        sut = NetworkController(session: session)
+        sut.getData(url: "") { (_: Data?, error) in
             let networkerror = error as? NetworkError
             XCTAssertTrue(networkerror == NetworkError.invalidURL)
         }
     }
-    
+
     func testInvalidJsonData() {
         let jsonObject: [String: String] = [
             "firstName": "fail",
@@ -54,34 +57,71 @@ class CodingAssignTestNetwork: XCTestCase {
         let exp = expectation(description: "wait for network")
         let jsonEncoder = try? JSONEncoder().encode(jsonObject)
         let session = URLMockSession(data: jsonEncoder, error: nil)
-        sut.getData(session: session, url: validURL) { (data: TestModel?, error) in
+        sut = NetworkController(session: session)
+        sut.getData(url: validURL) { (data: TestModel?, error) in
+            exp.fulfill()
             XCTAssertNil(data)
             let networkError = error as? NetworkError
             XCTAssertEqual(networkError, NetworkError.invalidJSONData)
-            exp.fulfill()
         }
-        waitForExpectations(timeout: 0.1, handler: nil)
+        waitForExpectations(timeout: 0.5, handler: nil)
     }
-    
+
     func testValidData() {
         let jsonencoder = JSONEncoder()
         let jsonData = try? jsonencoder.encode(TestModel(name: "Jerry", id: 132))
         let session = URLMockSession(data: jsonData, error: nil)
-        sut.getData(session: session, url: validURL) { (data: TestModel?, error) in
+        sut = NetworkController(session: session)
+        sut.getData(url: validURL) { (data: TestModel?, error) in
             XCTAssertEqual(data?.name, "Jerry")
             XCTAssertNil(error)
         }
     }
-    
+
     func testUnknownError() {
         let unknownErrorSession = URLMockSession(data: nil, error: NetworkError.unknown)
+        sut = NetworkController(session: unknownErrorSession)
         let exp = expectation(description: "wait for network")
-        sut.getData(session: unknownErrorSession, url: validURL) { (data: TestModel?, error) in
+        sut.getData(url: validURL) { (data: TestModel?, error) in
             XCTAssertNil(data)
             let networkError = error as? NetworkError
             XCTAssertEqual(networkError, NetworkError.unknown)
             exp.fulfill()
         }
         waitForExpectations(timeout: 0.1, handler: nil)
+    }
+    
+    func testPostUnknowError() {
+        let session = URLMockSession(data: nil, error: NetworkError.unknown)
+        sut = NetworkController(session: session)
+        let exp = expectation(description: "wait for network")
+        sut.postData(url: validURL, headers: [:], data: nil) { (data, error) in
+            XCTAssertNil(data)
+            let networkError = error as? NetworkError
+            XCTAssertEqual(networkError, NetworkError.unknown)
+            exp.fulfill()
+        }
+        waitForExpectations(timeout: 0.1, handler: nil)
+    }
+    
+    func testPostInvalidURL() {
+        let session = URLMockSession(data: nil, error: nil)
+        sut = NetworkController(session: session)
+        sut.postData(url: "", headers: [:], data: nil) { (data, error) in
+            let networkerror = error as? NetworkError
+            XCTAssertTrue(networkerror == NetworkError.invalidURL)
+        }
+    }
+    
+    func testPostValidData() {
+        let jsonencoder = JSONEncoder()
+        let jsonData = try? jsonencoder.encode(TestModel(name: "Jerry", id: 132))
+        let session = URLMockSession(data: jsonData, error: nil)
+        sut = NetworkController(session: session)
+        let data = Data(jsonData!)
+        sut.postData(url: validURL, headers: [:], data: data) { (data, error) in
+            XCTAssertNotNil(data)
+            XCTAssertNil(error)
+        }
     }
 }
